@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<behavior name="MTCHandlePickAndPlace">
+
+    <executable package_path="mtc_flexbe_behaviors.mtchandlepickandplace_sm" class="MTCHandlePickAndPlaceSM" />
+    <tagstring></tagstring>
+    <author>Brian Flynn</author>
+    <date>Thu Nov 20 2025</date>
+    <description>
+        Use MoveIt Task Constructor (MTC) tasks to plan and execute two separate
+        operations plus gripper operation: an approach and retreat task followed buy a
+        close gripper command, then a retreat and place task
+    </description>
+
+
+    <!-- Contained Behaviors -->
+
+    <!-- Available Parameters -->
+
+</behavior>

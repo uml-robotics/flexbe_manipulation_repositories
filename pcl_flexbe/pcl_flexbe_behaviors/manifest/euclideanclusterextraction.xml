@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<behavior name="EuclideanClusterExtraction">
+
+    <executable package_path="pcl_flexbe_behaviors.euclideanclusterextraction_sm" class="EuclideanClusterExtractionSM" />
+    <tagstring></tagstring>
+    <author>Brian Flynn</author>
+    <date>Thu Nov 20 2025</date>
+    <description>
+        Filter the incoming cloud by extracting the indices of clusters within the
+        scene, then publish that cloud on 'target_object' topic for awareness
+    </description>
+
+
+    <!-- Contained Behaviors -->
+
+    <!-- Available Parameters -->
+
+</behavior>

@@ -173,7 +173,7 @@ class PickAndPlacePipelineGPDSM(Behavior):
             OperatableStateMachine.add('TakeSnapshot',
                                        GetPointCloudServiceState(service_timeout=5.0,
                                                                  service_name='/get_point_cloud',
-                                                                 camera_topic='/rgbd_camera/points',
+                                                                 camera_topic='/camera/depth/points',
                                                                  target_frame='panda_link0'),
                                        transitions={'finished': 'EuclideanClusterExtraction'  # 533 115 -1 -1 -1 -1
                                                     , 'failed': 'failed'  # 379 252 -1 -1 -1 -1

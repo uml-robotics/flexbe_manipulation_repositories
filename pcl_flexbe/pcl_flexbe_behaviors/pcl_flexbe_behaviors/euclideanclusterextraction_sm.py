@@ -106,7 +106,7 @@ class EuclideanClusterExtractionSM(Behavior):
                                        PassthroughServiceState(service_timeout=5.0,
                                                                service_name='/passthrough_filter',
                                                                lower_limit=0.005,
-                                                               upper_limit=1.0,
+                                                               upper_limit=0.25,
                                                                field='z'),
                                        transitions={'finished': 'SegmentTablePlane'  # 241 115 -1 -1 -1 -1
                                                     , 'failed': 'failed'  # 162 266 -1 -1 -1 -1

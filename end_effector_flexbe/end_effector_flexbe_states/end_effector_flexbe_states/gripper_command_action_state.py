@@ -27,7 +27,7 @@ class GripperCommandActionState(EventState):
 
     def __init__(self,
                  timeout_sec: float = 5.0,
-                 action_name_fmt: str = '/{robot_name}_hand_controller/gripper_cmd'):
+                 action_name_fmt: str = '/hand_controller/gripper_cmd'):
         super().__init__(
             outcomes=['success', 'failed'],
             input_keys=['robot_name', 'position', 'max_effort']

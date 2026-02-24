@@ -84,7 +84,7 @@ class MTCHandlePickAndPlaceSM(Behavior):
     def create(self):
         """Create state machine."""
         # Root state machine
-        # x:1055 y:176, x:483 y:414
+        # x:1055 y:176, x:484 y:318
         _state_machine = OperatableStateMachine(outcomes=['finished', 'failed'], input_keys=['grasp_approach_poses', 'grasp_target_poses', 'grasp_retreat_poses'])
         _state_machine.userdata.grasp_approach_poses = 0
         _state_machine.userdata.grasp_target_poses = 0
@@ -93,7 +93,7 @@ class MTCHandlePickAndPlaceSM(Behavior):
         _state_machine.userdata.approach_and_pick_index = 0
         _state_machine.userdata.retreat_and_place_index = 0
         _state_machine.userdata.robot_name = 'panda'
-        _state_machine.userdata.close = 0.01
+        _state_machine.userdata.close = 0.0
         _state_machine.userdata.max_effort = 40.0
 
         # Additional creation code can be added inside the following tags
@@ -107,9 +107,9 @@ class MTCHandlePickAndPlaceSM(Behavior):
             OperatableStateMachine.add('ApproachAndPick',
                                        MTCApproachAndPickActionState(timeout_sec=5.0,
                                                                      action_name='mtc_approach_and_pick'),
-                                       transitions={'success': 'wait_before'  # 226 32 -1 -1 -1 -1
-                                                    , 'next': 'ApproachAndPick'  # 180 181 -1 -1 -1 -1
-                                                    , 'failed': 'failed'  # 319 334 -1 -1 -1 -1
+                                       transitions={'success': 'WaitToClose'  # 352 78 -1 -1 -1 -1
+                                                    , 'next': 'WaitToClose'  # 352 78 -1 -1 -1 -1
+                                                    , 'failed': 'failed'  # 359 252 -1 -1 -1 -1
                                                     },
                                        autonomy={'success': Autonomy.Off,
                                                  'next': Autonomy.Off,
@@ -120,25 +120,32 @@ class MTCHandlePickAndPlaceSM(Behavior):
                                                   'object_id': 'object_id',
                                                   'grasp_index': 'approach_and_pick_index'})
 
-            # x:377 y:71
+            # x:619 y:67
+            OperatableStateMachine.add('CloseDelay',
+                                       WaitState(wait_time=1),
+                                       transitions={'done': 'RetreatAndPlace'  # 740 82 -1 -1 -1 -1
+                                                    },
+                                       autonomy={'done': Autonomy.Off})
+
+            # x:452 y:176
             OperatableStateMachine.add('CloseGripper',
                                        GripperCommandActionState(timeout_sec=5.0,
                                                                  action_name_fmt='/hand_controller/gripper_cmd'),
-                                       transitions={'success': 'wait_after'  # 501 39 -1 -1 -1 -1
-                                                    , 'failed': 'failed'  # 455 246 -1 -1 -1 -1
+                                       transitions={'success': 'CloseDelay'  # 662 157 -1 -1 -1 -1
+                                                    , 'failed': 'failed'  # 524 270 -1 -1 -1 -1
                                                     },
                                        autonomy={'success': Autonomy.Off, 'failed': Autonomy.Off},
                                        remapping={'robot_name': 'robot_name',
                                                   'position': 'close',
                                                   'max_effort': 'max_effort'})
 
-            # x:634 y:70
+            # x:780 y:66
             OperatableStateMachine.add('RetreatAndPlace',
                                        MTCRetreatAndPlaceActionState(timeout_sec=5.0,
                                                                      action_name='mtc_retreat_and_place'),
-                                       transitions={'success': 'finished'  # 973 113 -1 -1 -1 -1
-                                                    , 'next': 'RetreatAndPlace'  # 721 201 -1 -1 -1 -1
-                                                    , 'failed': 'failed'  # 617 310 -1 -1 -1 -1
+                                       transitions={'success': 'finished'  # 1001 111 -1 -1 -1 -1
+                                                    , 'next': 'finished'  # 1001 111 -1 -1 -1 -1
+                                                    , 'failed': 'failed'  # 713 233 -1 -1 -1 -1
                                                     },
                                        autonomy={'success': Autonomy.Off,
                                                  'next': Autonomy.Off,
@@ -149,17 +156,24 @@ class MTCHandlePickAndPlaceSM(Behavior):
                                                   'object_id': 'object_id',
                                                   'grasp_index': 'retreat_and_place_index'})
 
-            # x:542 y:3
-            OperatableStateMachine.add('wait_after',
-                                       WaitState(wait_time=1.0),
-                                       transitions={'done': 'RetreatAndPlace'  # 673 41 -1 -1 -1 -1
+            # x:157 y:161
+            OperatableStateMachine.add('RetryWait',
+                                       WaitState(wait_time=10),
+                                       transitions={'done': 'ApproachAndPick'  # 129 161 -1 -1 -1 -1
                                                     },
                                        autonomy={'done': Autonomy.Off})
 
-            # x:293 y:0
-            OperatableStateMachine.add('wait_before',
-                                       WaitState(wait_time=1.0),
-                                       transitions={'done': 'CloseGripper'  # 421 31 -1 -1 -1 -1
+            # x:820 y:179
+            OperatableStateMachine.add('RetryWait2',
+                                       WaitState(wait_time=10),
+                                       transitions={'done': 'RetreatAndPlace'  # 791 177 -1 -1 -1 -1
+                                                    },
+                                       autonomy={'done': Autonomy.Off})
+
+            # x:383 y:66
+            OperatableStateMachine.add('WaitToClose',
+                                       WaitState(wait_time=2),
+                                       transitions={'done': 'CloseGripper'  # 437 161 -1 -1 -1 -1
                                                     },
                                        autonomy={'done': Autonomy.Off})
 

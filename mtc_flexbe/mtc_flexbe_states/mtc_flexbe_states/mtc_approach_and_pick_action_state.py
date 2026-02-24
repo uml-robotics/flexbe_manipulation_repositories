@@ -156,9 +156,11 @@ class MTCApproachAndPickActionState(EventState):
         # Call this method when an outcome is returned and another state gets active.
         # It can be used to stop possibly running processes started by on_enter.
 
-        # You could cancel the goal here if you want to be defensive on early exits:
+        # Only cancel if we are leaving the state BEFORE the action produced a result.
+        # If we already have a result, canceling here can race with the server finishing.
         try:
-            if self._sent_goal and self._ac is not None and self._ac.is_available(self._action_name):
+            if (self._sent_goal and self._ac is not None and self._ac.is_available(self._action_name)
+                and not self._ac.has_result(self._action_name)):
                 self._ac.cancel(self._action_name)
         except Exception:
             # Non-fatal cleanup

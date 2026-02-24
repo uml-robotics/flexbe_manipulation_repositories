@@ -158,7 +158,8 @@ class MTCRetreatAndPlaceActionState(EventState):
 
         # You could cancel the goal here if you want to be defensive on early exits:
         try:
-            if self._sent_goal and self._ac is not None and self._ac.is_available(self._action_name):
+            if (self._sent_goal and self._ac is not None and self._ac.is_available(self._action_name)
+                and not self._ac.has_result(self._action_name)):
                 self._ac.cancel(self._action_name)
         except Exception:
             # Non-fatal cleanup

@@ -42,6 +42,7 @@ from flexbe_core import Logger
 from flexbe_core import OperatableStateMachine
 from flexbe_core import PriorityContainer
 from flexbe_core import initialize_flexbe_core
+from flexbe_states.wait_state import WaitState
 from gpd_flexbe_behaviors.gpddetectgrasps_sm import GPDDetectGraspsSM
 from move_group_flexbe_states.move_to_named_pose_service_state import MoveToNamedPoseServiceState
 from mtc_flexbe_behaviors.mtchandlepickandplace_sm import MTCHandlePickAndPlaceSM
@@ -163,7 +164,7 @@ class PickAndPlacePipelineGPDSM(Behavior):
             OperatableStateMachine.add('MoveReady',
                                        MoveToNamedPoseServiceState(service_timeout=5.0,
                                                                    service_name='/move_to_named_pose'),
-                                       transitions={'finished': 'MTCHandlePickAndPlace'  # 1334 104 -1 -1 -1 -1
+                                       transitions={'finished': 'MTCHandlePickAndPlace'  # 1349 111 -1 -1 -1 -1
                                                     , 'failure': 'failed'  # 1170 252 -1 -1 -1 -1
                                                     },
                                        autonomy={'finished': Autonomy.Off, 'failure': Autonomy.Off},
@@ -182,6 +183,13 @@ class PickAndPlacePipelineGPDSM(Behavior):
                                        remapping={'camera_pose': 'camera_pose',
                                                   'cloud_out': 'scene_pointcloud',
                                                   'cloud_frame': 'cloud_frame'})
+
+            # x:1289 y:14
+            OperatableStateMachine.add('WaitAfterPose',
+                                       WaitState(wait_time=1),
+                                       transitions={'done': 'MTCHandlePickAndPlace'  # 1448 44 -1 -1 -1 -1
+                                                    },
+                                       autonomy={'done': Autonomy.Off})
 
         return _state_machine
 

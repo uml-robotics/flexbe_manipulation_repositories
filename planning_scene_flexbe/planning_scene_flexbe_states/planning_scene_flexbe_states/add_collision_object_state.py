@@ -18,14 +18,13 @@ import rclpy
 from flexbe_core import EventState, Logger
 from flexbe_core.proxy import ProxyServiceCaller
 
-from planning_scene_ros2.srv import GetPointCloud as SrvType # request: input, camera_pose, cluster_tolerance, min/max size
+from planning_scene_ros2.srv import AddCollisionObject as SrvType # request: x, y, z, l, w, h
 
-class GetPointCloudServiceState(EventState):
+class AddCollisionObjectServiceState(EventState):
     """
     Calls /add_collision_object to add a collision object of size l,w,h to the scene at position x,y,z with identity quaternion.
 
-    -- service_timeout        float     Timeout for service discovery (sec, default: 5.0)
-    -- service_name           str       Camera Topic (default: '/rgbd_camera/points')
+    -- service_name           str       Service name (default: '/add_collision_object')
     -- x, y, z, l, w, h       float     position (x,y,z) and box dimensions (l,w,h)
 
     <= finished

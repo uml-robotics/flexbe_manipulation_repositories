@@ -32,7 +32,8 @@ class MTCRetreatAndPlaceActionState(EventState):
 
     def __init__(self, 
                  timeout_sec: float = 5.0,
-                 action_name = 'mtc_retreat_and_place'):
+                 action_name = 'mtc_retreat_and_place',
+                 num_attempts = 10):
         super().__init__(
             outcomes=['success', 'next', 'failed'],
             input_keys=['grasp_approach_poses', 'grasp_target_poses', 'grasp_retreat_poses', 'object_id', 'grasp_index'],
@@ -47,6 +48,7 @@ class MTCRetreatAndPlaceActionState(EventState):
         # --- configuration / parameters ---
         self._timeout_sec = float(timeout_sec)
         self._action_name = action_name
+        self._num_attempts = num_attempts
 
         # --- internal state ---
         self._ac: Optional[ProxyActionClient] = None
@@ -94,7 +96,7 @@ class MTCRetreatAndPlaceActionState(EventState):
 
         # Try to advance to next candidate if any remain
         try:
-            n = min(len(userdata.grasp_approach_poses), len(userdata.grasp_target_poses), len(userdata.grasp_retreat_poses))
+            n = min(len(userdata.grasp_approach_poses), len(userdata.grasp_target_poses), len(userdata.grasp_retreat_poses), self._num_attempts)
             if isinstance(userdata.grasp_index, int) and (userdata.grasp_index + 1) < n:
                 userdata.grasp_index += 1
                 return 'next'

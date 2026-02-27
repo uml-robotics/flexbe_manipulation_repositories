@@ -42,12 +42,12 @@ from flexbe_core import Logger
 from flexbe_core import OperatableStateMachine
 from flexbe_core import PriorityContainer
 from flexbe_core import initialize_flexbe_core
-from flexbe_states.wait_state import WaitState
 from gpd_flexbe_behaviors.gpddetectgrasps_sm import GPDDetectGraspsSM
 from move_group_flexbe_states.move_to_named_pose_service_state import MoveToNamedPoseServiceState
 from mtc_flexbe_behaviors.mtchandlepickandplace_sm import MTCHandlePickAndPlaceSM
 from pcl_flexbe_behaviors.euclideanclusterextraction_sm import EuclideanClusterExtractionSM
 from pcl_flexbe_states.get_point_cloud_service_state import GetPointCloudServiceState
+from planning_scene_flexbe_states.add_collision_object_state import AddCollisionObjectServiceState
 
 # Additional imports can be added inside the following tags
 # [MANUAL_IMPORT]
@@ -91,7 +91,7 @@ class PickAndPlacePipelineGPDSM(Behavior):
     def create(self):
         """Create state machine."""
         # Root state machine
-        # x:1700 y:111, x:248 y:329
+        # x:1908 y:114, x:610 y:377
         _state_machine = OperatableStateMachine(outcomes=['finished', 'failed'])
         _state_machine.userdata.camera_pose = 0
         _state_machine.userdata.cloud_frame = 0
@@ -109,21 +109,25 @@ class PickAndPlacePipelineGPDSM(Behavior):
         # [/MANUAL_CREATE]
 
         with _state_machine:
-            # x:67 y:103
-            OperatableStateMachine.add('MoveInspect',
-                                       MoveToNamedPoseServiceState(service_timeout=5.0,
-                                                                   service_name='/move_to_named_pose'),
-                                       transitions={'finished': 'TakeSnapshot'  # 289 119 -1 -1 -1 -1
-                                                    , 'failure': 'failed'  # 119 273 -1 -1 -1 -1
+            # x:44 y:103
+            OperatableStateMachine.add('AddGroundPlaneCollision',
+                                       AddCollisionObjectServiceState(service_name='/add_collision_object',
+                                                                      x=0.0,
+                                                                      y=0.0,
+                                                                      z=-0.005,
+                                                                      l=1.0,
+                                                                      w=1.0,
+                                                                      h=0.01),
+                                       transitions={'finished': 'MoveInspect'  # 251 118 -1 -1 -1 -1
+                                                    , 'failed': 'failed'  # 127 327 -1 -1 -1 -1
                                                     },
-                                       autonomy={'finished': Autonomy.Off, 'failure': Autonomy.Off},
-                                       remapping={'target_pose_name': 'inspect_pose'})
+                                       autonomy={'finished': Autonomy.Off, 'failed': Autonomy.Off})
 
-            # x:586 y:98
+            # x:813 y:91
             OperatableStateMachine.add('EuclideanClusterExtraction',
                                        self.use_behavior(EuclideanClusterExtractionSM, 'EuclideanClusterExtraction'),
-                                       transitions={'finished': 'GPDDetectGrasps'  # 822 100 -1 -1 -1 -1
-                                                    , 'failed': 'failed'  # 601 245 -1 -1 -1 -1
+                                       transitions={'finished': 'GPDDetectGrasps'  # 1045 104 -1 -1 -1 -1
+                                                    , 'failed': 'failed'  # 752 273 874 150 -1 -1
                                                     },
                                        autonomy={'finished': Autonomy.Inherit,
                                                  'failed': Autonomy.Inherit},
@@ -131,11 +135,11 @@ class PickAndPlacePipelineGPDSM(Behavior):
                                                   'camera_pose': 'camera_pose',
                                                   'filtered_cloud': 'filtered_cloud'})
 
-            # x:871 y:97
+            # x:1095 y:89
             OperatableStateMachine.add('GPDDetectGrasps',
                                        self.use_behavior(GPDDetectGraspsSM, 'GPDDetectGrasps'),
-                                       transitions={'finished': 'MoveReady'  # 1069 109 -1 -1 -1 -1
-                                                    , 'failed': 'failed'  # 934 243 -1 -1 -1 -1
+                                       transitions={'finished': 'MoveReady',
+                                                    'failed': 'failed'  # 1040 270 1143 148 -1 -1
                                                     },
                                        autonomy={'finished': Autonomy.Inherit,
                                                  'failed': Autonomy.Inherit},
@@ -148,11 +152,11 @@ class PickAndPlacePipelineGPDSM(Behavior):
                                                   'grasp_retreat_poses': 'grasp_retreat_poses',
                                                   'grasp_waypoints': 'grasp_waypoints'})
 
-            # x:1387 y:97
+            # x:1604 y:87
             OperatableStateMachine.add('MTCHandlePickAndPlace',
                                        self.use_behavior(MTCHandlePickAndPlaceSM, 'MTCHandlePickAndPlace'),
-                                       transitions={'finished': 'finished'  # 1612 115 -1 -1 -1 -1
-                                                    , 'failed': 'failed'  # 1483 251 -1 -1 -1 -1
+                                       transitions={'finished': 'finished'  # 1823 115 -1 -1 -1 -1
+                                                    , 'failed': 'failed'  # 1536 280 1636 146 -1 -1
                                                     },
                                        autonomy={'finished': Autonomy.Inherit,
                                                  'failed': Autonomy.Inherit},
@@ -160,36 +164,39 @@ class PickAndPlacePipelineGPDSM(Behavior):
                                                   'grasp_target_poses': 'grasp_target_poses',
                                                   'grasp_retreat_poses': 'grasp_retreat_poses'})
 
-            # x:1119 y:96
+            # x:298 y:102
+            OperatableStateMachine.add('MoveInspect',
+                                       MoveToNamedPoseServiceState(service_timeout=5.0,
+                                                                   service_name='/move_to_named_pose'),
+                                       transitions={'finished': 'TakeSnapshot'  # 516 118 -1 -1 -1 -1
+                                                    , 'failure': 'failed'  # 388 309 -1 -1 -1 -1
+                                                    },
+                                       autonomy={'finished': Autonomy.Off, 'failure': Autonomy.Off},
+                                       remapping={'target_pose_name': 'inspect_pose'})
+
+            # x:1337 y:88
             OperatableStateMachine.add('MoveReady',
                                        MoveToNamedPoseServiceState(service_timeout=5.0,
                                                                    service_name='/move_to_named_pose'),
-                                       transitions={'finished': 'MTCHandlePickAndPlace'  # 1349 111 -1 -1 -1 -1
-                                                    , 'failure': 'failed'  # 1170 252 -1 -1 -1 -1
+                                       transitions={'finished': 'MTCHandlePickAndPlace',
+                                                    'failure': 'failed'  # 1261 281 1383 141 -1 -1
                                                     },
                                        autonomy={'finished': Autonomy.Off, 'failure': Autonomy.Off},
                                        remapping={'target_pose_name': 'ready_pose'})
 
-            # x:340 y:99
+            # x:567 y:100
             OperatableStateMachine.add('TakeSnapshot',
                                        GetPointCloudServiceState(service_timeout=5.0,
                                                                  service_name='/get_point_cloud',
                                                                  camera_topic='/camera/depth/points',
                                                                  target_frame='panda_link0'),
-                                       transitions={'finished': 'EuclideanClusterExtraction'  # 533 115 -1 -1 -1 -1
-                                                    , 'failed': 'failed'  # 379 252 -1 -1 -1 -1
+                                       transitions={'finished': 'EuclideanClusterExtraction'  # 762 113 -1 -1 -1 -1
+                                                    , 'failed': 'failed'  # 589 284 632 153 -1 -1
                                                     },
                                        autonomy={'finished': Autonomy.Off, 'failed': Autonomy.Off},
                                        remapping={'camera_pose': 'camera_pose',
                                                   'cloud_out': 'scene_pointcloud',
                                                   'cloud_frame': 'cloud_frame'})
-
-            # x:1289 y:14
-            OperatableStateMachine.add('WaitAfterPose',
-                                       WaitState(wait_time=1),
-                                       transitions={'done': 'MTCHandlePickAndPlace'  # 1448 44 -1 -1 -1 -1
-                                                    },
-                                       autonomy={'done': Autonomy.Off})
 
         return _state_machine
 

@@ -33,7 +33,17 @@ class MTCApproachAndPickActionState(EventState):
     def __init__(self, 
                  timeout_sec: float = 5.0,
                  action_name = 'mtc_approach_and_pick',
-                 num_attempts = 10):
+                 num_attempts = 10,
+                 arm_group: str = 'arm',
+                 hand_group: str = 'hand',
+                 eef: str = 'tool0',
+                 ik_frame: str = 'tool0',
+                 open_named_state: str = 'open',
+                 close_named_state: str = 'close',
+                 cart_step_size: float = 0.005,
+                 vel_scale: float = 0.6,
+                 acc_scale: float = 0.6,
+                 pipeline_id: str = ''):
         super().__init__(
             outcomes=['success', 'next', 'failed'],
             input_keys=['grasp_approach_poses', 'grasp_target_poses', 'grasp_retreat_poses', 'object_id', 'grasp_index'],
@@ -49,6 +59,16 @@ class MTCApproachAndPickActionState(EventState):
         self._timeout_sec = float(timeout_sec)
         self._action_name = action_name
         self._num_attempts = num_attempts
+        self._arm_group = arm_group
+        self._hand_group = hand_group
+        self._eef = eef
+        self._ik_frame = ik_frame
+        self._open_named_state = open_named_state
+        self._close_named_state = close_named_state
+        self._cart_step_size = float(cart_step_size)
+        self._vel_scale = float(vel_scale)
+        self._acc_scale = float(acc_scale)
+        self._pipeline_id = pipeline_id
 
         # --- internal state ---
         self._ac: Optional[ProxyActionClient] = None
@@ -126,6 +146,16 @@ class MTCApproachAndPickActionState(EventState):
             goal.grasp    = grasp_target_poses[idx]
             goal.retreat  = grasp_retreat_poses[idx]
             goal.object_id = getattr(userdata, 'object_id', '') or ''
+            goal.arm_group = self._arm_group
+            goal.hand_group = self._hand_group
+            goal.eef = self._eef
+            goal.ik_frame = self._ik_frame
+            goal.open_named_state = self._open_named_state
+            goal.close_named_state = self._close_named_state
+            goal.cart_step_size = self._cart_step_size
+            goal.vel_scale = self._vel_scale
+            goal.acc_scale = self._acc_scale
+            goal.pipeline_id = self._pipeline_id
         except Exception as e:
             Logger.logerr(f"[{type(self).__name__}] Failed to construct goal: {e}")
             self._had_error = True

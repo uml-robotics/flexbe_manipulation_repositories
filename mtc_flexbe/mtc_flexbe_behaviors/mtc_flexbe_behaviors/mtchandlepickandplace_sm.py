@@ -107,7 +107,13 @@ class MTCHandlePickAndPlaceSM(Behavior):
             OperatableStateMachine.add('ApproachAndPick',
                                        MTCApproachAndPickActionState(timeout_sec=5.0,
                                                                      action_name='mtc_approach_and_pick',
-                                                                     num_attempts=10),
+                                                                     num_attempts=10,
+                                                                     arm_group='arm',
+                                                                     hand_group='end_effector',
+                                                                     eef='end_effector',
+                                                                     ik_frame='robotiq_85_base_link',
+                                                                     open_named_state='open',
+                                                                     close_named_state='close'),
                                        transitions={'success': 'WaitToClose'  # 352 78 -1 -1 -1 -1
                                                     , 'next': 'RetryWait'  # 299 170 -1 -1 -1 -1
                                                     , 'failed': 'failed'  # 359 252 -1 -1 -1 -1
@@ -144,7 +150,13 @@ class MTCHandlePickAndPlaceSM(Behavior):
             OperatableStateMachine.add('RetreatAndPlace',
                                        MTCRetreatAndPlaceActionState(timeout_sec=5.0,
                                                                      action_name='mtc_retreat_and_place',
-                                                                     num_attempts=10),
+                                                                     num_attempts=10,
+                                                                     arm_group='arm',
+                                                                     hand_group='end_effector',
+                                                                     eef='end_effector',
+                                                                     ik_frame='robotiq_85_base_link',
+                                                                     open_named_state='open',
+                                                                     close_named_state='close'),
                                        transitions={'success': 'finished'  # 1001 111 -1 -1 -1 -1
                                                     , 'next': 'RetryWait2'  # 964 166 -1 -1 -1 -1
                                                     , 'failed': 'failed'  # 713 233 -1 -1 -1 -1

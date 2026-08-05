@@ -6,16 +6,16 @@ import rclpy
 from flexbe_core import EventState, Logger
 from flexbe_core.proxy import ProxyActionClient
 
-from control_msgs.action import GripperCommand
+from control_msgs.action import ParallelGripperCommand
 
 
 class GripperCommandActionState(EventState):
     """
-    Sends a GripperCommand action to a hand controller.
+    Sends a ParallelGripperCommand action to a hand controller.
 
     -- timeout_sec       float   Seconds to wait for action server discovery (default: 5.0)
-    -- action_name_fmt   str     Format string for the action name using {robot_name}
-                                 (default: '/{robot_name}_hand_controller/gripper_cmd')
+    -- action_name_fmt   str     Format string for the gripper action name
+                                 (default: '/robotiq_gripper_controller/gripper_cmd')
 
     ># robot_name        str     Robot name used to format the action server name
     ># position          float   Desired gripper position
@@ -27,7 +27,7 @@ class GripperCommandActionState(EventState):
 
     def __init__(self,
                  timeout_sec: float = 5.0,
-                 action_name_fmt: str = '/hand_controller/gripper_cmd'):
+                 action_name_fmt: str = '/robotiq_gripper_controller/gripper_cmd'):
         super().__init__(
             outcomes=['success', 'failed'],
             input_keys=['robot_name', 'position', 'max_effort']
@@ -60,7 +60,7 @@ class GripperCommandActionState(EventState):
 
         # NOTE: ProxyActionClient.get_result() returns the *Result message* directly (not a wrapper)
         try:
-            r = self._ac.get_result(self._action_name)  # type: GripperCommand.Result
+            r = self._ac.get_result(self._action_name)  # type: ParallelGripperCommand.Result
         except Exception as e:
             Logger.logerr(f"[{type(self).__name__}] Failed to get result: {e}")
             return 'failed'
@@ -69,17 +69,19 @@ class GripperCommandActionState(EventState):
             Logger.logerr(f"[{type(self).__name__}] Empty result from action.")
             return 'failed'
 
-        Logger.loginfo(
-            f"[{type(self).__name__}] Result: "
-            f"position={getattr(r, 'position', float('nan')):.4f}, "
-            f"effort={getattr(r, 'effort', float('nan')):.2f}, "
-            f"stalled={getattr(r, 'stalled', False)}, "
-            f"reached_goal={getattr(r, 'reached_goal', False)}"
-        )
-
         reached = getattr(r, 'reached_goal', False)
         stalled = getattr(r, 'stalled', False)
-        pos = getattr(r, 'position', 0.0)
+        state = getattr(r, 'state', None)
+        positions = getattr(state, 'position', []) if state is not None else []
+        efforts = getattr(state, 'effort', []) if state is not None else []
+        pos = positions[0] if positions else 0.0
+        effort = efforts[0] if efforts else 0.0
+
+        Logger.loginfo(
+            f"[{type(self).__name__}] Result: "
+            f"position={pos:.4f}, effort={effort:.2f}, "
+            f"stalled={stalled}, reached_goal={reached}"
+        )
 
         # Success policy: prefer reached_goal, otherwise allow "close enough & not stalled"
         if reached or (abs(pos - userdata.position) < 1e-3 and not stalled):
@@ -98,13 +100,13 @@ class GripperCommandActionState(EventState):
         self._action_name = self._action_name_fmt.format(robot_name=userdata.robot_name)
 
         # Construct goal
-        goal = GripperCommand.Goal()
-        goal.command.position = float(userdata.position)
-        goal.command.max_effort = float(userdata.max_effort)
+        goal = ParallelGripperCommand.Goal()
+        goal.command.position = [float(userdata.position)]
+        goal.command.effort = [float(userdata.max_effort)]
 
         # Create / register proxy client for this action
         try:
-            self._ac = ProxyActionClient({self._action_name: GripperCommand})
+            self._ac = ProxyActionClient({self._action_name: ParallelGripperCommand})
         except Exception as e:
             Logger.logerr(f"[{type(self).__name__}] Failed to create ProxyActionClient: {e}")
             self._had_error = True
@@ -120,7 +122,7 @@ class GripperCommandActionState(EventState):
         # Send goal
         try:
             Logger.loginfo(f"[{type(self).__name__}] Sending goal to '{self._action_name}': "
-                           f"position={goal.command.position}, max_effort={goal.command.max_effort}")
+                           f"position={goal.command.position[0]}, max_effort={goal.command.effort[0]}")
             self._ac.send_goal(self._action_name, goal)
             self._sent_goal = True
         except Exception as e:

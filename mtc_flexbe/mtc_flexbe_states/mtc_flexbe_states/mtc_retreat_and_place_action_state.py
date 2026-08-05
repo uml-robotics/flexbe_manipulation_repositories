@@ -41,8 +41,8 @@ class MTCRetreatAndPlaceActionState(EventState):
                  open_named_state: str = 'open',
                  close_named_state: str = 'close',
                  cart_step_size: float = 0.005,
-                 vel_scale: float = 0.6,
-                 acc_scale: float = 0.6,
+                 vel_scale: float = 0.1,
+                 acc_scale: float = 0.1,
                  pipeline_id: str = ''):
         super().__init__(
             outcomes=['success', 'next', 'failed'],

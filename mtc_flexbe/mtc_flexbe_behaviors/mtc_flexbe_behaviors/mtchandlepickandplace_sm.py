@@ -92,8 +92,8 @@ class MTCHandlePickAndPlaceSM(Behavior):
         _state_machine.userdata.object_id = 0
         _state_machine.userdata.approach_and_pick_index = 0
         _state_machine.userdata.retreat_and_place_index = 0
-        _state_machine.userdata.robot_name = 'panda'
-        _state_machine.userdata.close = 0.0
+        _state_machine.userdata.robot_name = 'ur5e'
+        _state_machine.userdata.close = 0.7929
         _state_machine.userdata.max_effort = 40.0
 
         # Additional creation code can be added inside the following tags
@@ -111,7 +111,7 @@ class MTCHandlePickAndPlaceSM(Behavior):
                                                                      arm_group='arm',
                                                                      hand_group='end_effector',
                                                                      eef='end_effector',
-                                                                     ik_frame='robotiq_85_base_link',
+                                                                     ik_frame='tcp_link',
                                                                      open_named_state='open',
                                                                      close_named_state='close'),
                                        transitions={'success': 'WaitToClose'  # 352 78 -1 -1 -1 -1
@@ -137,7 +137,7 @@ class MTCHandlePickAndPlaceSM(Behavior):
             # x:452 y:176
             OperatableStateMachine.add('CloseGripper',
                                        GripperCommandActionState(timeout_sec=5.0,
-                                                                 action_name_fmt='/hand_controller/gripper_cmd'),
+                                                                 action_name_fmt='/robotiq_gripper_controller/gripper_cmd'),
                                        transitions={'success': 'CloseDelay'  # 654 173 -1 -1 -1 -1
                                                     , 'failed': 'failed'  # 524 270 -1 -1 -1 -1
                                                     },
@@ -154,7 +154,7 @@ class MTCHandlePickAndPlaceSM(Behavior):
                                                                      arm_group='arm',
                                                                      hand_group='end_effector',
                                                                      eef='end_effector',
-                                                                     ik_frame='robotiq_85_base_link',
+                                                                     ik_frame='tcp_link',
                                                                      open_named_state='open',
                                                                      close_named_state='close'),
                                        transitions={'success': 'finished'  # 1001 111 -1 -1 -1 -1

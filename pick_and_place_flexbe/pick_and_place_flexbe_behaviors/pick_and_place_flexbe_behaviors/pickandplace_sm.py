@@ -101,6 +101,8 @@ class PickAndPlacePipelineGPDSM(Behavior):
         _state_machine.userdata.indices = []
         _state_machine.userdata.camera_source = 0
         _state_machine.userdata.inspect_pose = 'inspect'
+        _state_machine.userdata.camera_topic = '/camera/camera/depth/color/points'
+        _state_machine.userdata.target_frame = 'ur5e_base_link'
 
         # Additional creation code can be added inside the following tags
         # [MANUAL_CREATE]
@@ -115,8 +117,8 @@ class PickAndPlacePipelineGPDSM(Behavior):
                                                                       x=0.0,
                                                                       y=0.0,
                                                                       z=-0.005,
-                                                                      l=1.0,
-                                                                      w=1.0,
+                                                                      l=2.0,
+                                                                      w=2.0,
                                                                       h=0.01),
                                        transitions={'finished': 'MoveInspect'  # 251 118 -1 -1 -1 -1
                                                     , 'failed': 'failed'  # 127 327 -1 -1 -1 -1
@@ -188,8 +190,8 @@ class PickAndPlacePipelineGPDSM(Behavior):
             OperatableStateMachine.add('TakeSnapshot',
                                        GetPointCloudServiceState(service_timeout=5.0,
                                                                  service_name='/get_point_cloud',
-                                                                 camera_topic='/camera/depth/points',
-                                                                 target_frame='panda_link0'),
+                                                                 camera_topic=_state_machine.userdata.camera_topic,
+                                                                 target_frame=_state_machine.userdata.target_frame),
                                        transitions={'finished': 'EuclideanClusterExtraction'  # 762 113 -1 -1 -1 -1
                                                     , 'failed': 'failed'  # 589 284 632 153 -1 -1
                                                     },

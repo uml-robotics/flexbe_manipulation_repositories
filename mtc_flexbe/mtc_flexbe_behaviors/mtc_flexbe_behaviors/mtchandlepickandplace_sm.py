@@ -45,6 +45,7 @@ from flexbe_core import initialize_flexbe_core
 from flexbe_states.wait_state import WaitState
 from mtc_flexbe_states.mtc_approach_and_pick_action_state import MTCApproachAndPickActionState
 from mtc_flexbe_states.mtc_retreat_and_place_action_state import MTCRetreatAndPlaceActionState
+from gpd_flexbe_states.visualize_executed_grasp_service_state import VisualizeExecutedGraspServiceState
 
 # Additional imports can be added inside the following tags
 # [MANUAL_IMPORT]
@@ -85,7 +86,8 @@ class MTCHandlePickAndPlaceSM(Behavior):
         """Create state machine."""
         # Root state machine
         # x:1055 y:176, x:484 y:318
-        _state_machine = OperatableStateMachine(outcomes=['finished', 'failed'], input_keys=['grasp_approach_poses', 'grasp_target_poses', 'grasp_retreat_poses'])
+        _state_machine = OperatableStateMachine(outcomes=['finished', 'failed'], input_keys=['grasp_configs', 'grasp_approach_poses', 'grasp_target_poses', 'grasp_retreat_poses'])
+        _state_machine.userdata.grasp_configs = 0
         _state_machine.userdata.grasp_approach_poses = 0
         _state_machine.userdata.grasp_target_poses = 0
         _state_machine.userdata.grasp_retreat_poses = 0
@@ -103,6 +105,18 @@ class MTCHandlePickAndPlaceSM(Behavior):
         # [/MANUAL_CREATE]
 
         with _state_machine:
+            OperatableStateMachine.add('VisualizeExecutedGrasp',
+                                       VisualizeExecutedGraspServiceState(
+                                           service_name='/visualize_executed_grasp',
+                                           service_timeout=5.0),
+                                       transitions={'done': 'ApproachAndPick',
+                                                    'failed': 'ApproachAndPick'},
+                                       autonomy={'done': Autonomy.Off,
+                                                 'failed': Autonomy.Off},
+                                       remapping={'grasp_configs': 'grasp_configs',
+                                                  'grasp_target_poses': 'grasp_target_poses',
+                                                  'approach_and_pick_index': 'approach_and_pick_index'})
+
             # x:116 y:70
             OperatableStateMachine.add('ApproachAndPick',
                                        MTCApproachAndPickActionState(timeout_sec=5.0,
@@ -173,7 +187,7 @@ class MTCHandlePickAndPlaceSM(Behavior):
             # x:160 y:185
             OperatableStateMachine.add('RetryWait',
                                        WaitState(wait_time=0.5),
-                                       transitions={'done': 'ApproachAndPick'  # 111 169 -1 -1 -1 -1
+                                       transitions={'done': 'VisualizeExecutedGrasp'  # 111 169 -1 -1 -1 -1
                                                     },
                                        autonomy={'done': Autonomy.Off})
 

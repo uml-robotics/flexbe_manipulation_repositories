@@ -79,7 +79,7 @@ class GPDDetectGraspsSM(Behavior):
         """Create state machine."""
         # Root state machine
         # x:823 y:160, x:377 y:346
-        _state_machine = OperatableStateMachine(outcomes=['finished', 'failed'], input_keys=['cloud_in', 'camera_source', 'view_points', 'indices'], output_keys=['grasp_approach_poses', 'grasp_target_poses', 'grasp_retreat_poses', 'grasp_waypoints'])
+        _state_machine = OperatableStateMachine(outcomes=['finished', 'failed'], input_keys=['cloud_in', 'camera_source', 'view_points', 'indices'], output_keys=['grasp_configs', 'grasp_approach_poses', 'grasp_target_poses', 'grasp_retreat_poses', 'grasp_waypoints'])
         _state_machine.userdata.cloud_in = 0
         _state_machine.userdata.camera_source = 0
         _state_machine.userdata.view_points = 0

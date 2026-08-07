@@ -103,6 +103,7 @@ class PickAndPlacePipelineGPDSM(Behavior):
         _state_machine.userdata.inspect_pose = 'inspect'
         _state_machine.userdata.camera_topic = '/camera/camera/depth/color/points'
         _state_machine.userdata.target_frame = 'ur5e_base_link'
+        _state_machine.userdata.grasp_configs = 0
 
         # Additional creation code can be added inside the following tags
         # [MANUAL_CREATE]
@@ -149,6 +150,7 @@ class PickAndPlacePipelineGPDSM(Behavior):
                                                   'camera_source': 'camera_source',
                                                   'view_points': 'camera_pose',
                                                   'indices': 'indices',
+                                                  'grasp_configs': 'grasp_configs',
                                                   'grasp_approach_poses': 'grasp_approach_poses',
                                                   'grasp_target_poses': 'grasp_target_poses',
                                                   'grasp_retreat_poses': 'grasp_retreat_poses',
@@ -163,6 +165,7 @@ class PickAndPlacePipelineGPDSM(Behavior):
                                        autonomy={'finished': Autonomy.Inherit,
                                                  'failed': Autonomy.Inherit},
                                        remapping={'grasp_approach_poses': 'grasp_approach_poses',
+                                                  'grasp_configs': 'grasp_configs',
                                                   'grasp_target_poses': 'grasp_target_poses',
                                                   'grasp_retreat_poses': 'grasp_retreat_poses'})
 
